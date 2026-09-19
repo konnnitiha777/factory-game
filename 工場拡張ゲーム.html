@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Factory Frontier</title>
+
+<style>
+:root {
+  --bg: #0d1520;
+  --panel: #182536;
+  --panel2: #22344a;
+  --line: #3d5874;
+  --text: #edf5ff;
+  --muted: #a7b9cc;
+  --accent: #4fd1c5;
+  --gold: #ffd166;
+  --green: #7ee787;
+  --red: #ff7373;
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, #284d68 0, transparent 32rem),
+    var(--bg);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+}
+
+header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 13, 21, .9);
+}
+
+header h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+}
+
+header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 260px minmax(600px, 1fr) 295px;
+  gap: 14px;
+  padding: 14px;
+  min-height: calc(100vh - 80px);
+}
+
+.panel {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(24, 37, 54, .96);
+  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+}
+
+.panel h2 {
+  margin: 0 0 11px;
+  font-size: 15px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  padding: 9px;
+  border: 1px solid #30475f;
+  border-radius: 9px;
+  background: var(--panel2);
+}
+
+.stat small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.stat strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 16px;
+}
+
+button,
+select {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: var(--text);
+  background: #2b425d;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #3d5d7d;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+  transform: none;
+}
+
+select {
+  width: 100%;
+  border: 1px solid #45627e;
+  background: #17283b;
+}
+
+.build-list {
+  display: grid;
+  gap: 8px;
+}
+
+.build-button {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 7px;
+  align-items: center;
+  text-align: left;
+}
+
+.build-button.selected {
+  outline: 2px solid var(--accent);
+  background: #35647a;
+}
+
+.build-button .icon {
+  font-size: 23px;
+  text-align: center;
+}
+
+.build-button b {
+  display: block;
+  font-size: 13px;
+}
+
+.build-button small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.price {
+  color: var(--gold);
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.help,
+.card {
+  margin-top: 14px;
+  padding: 11px;
+  border-radius: 9px;
+  background: var(--panel2);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.card h3 {
+  margin: 0 0 7px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.card button {
+  width: 100%;
+  margin-top: 7px;
+}
+
+.game-area {
+  min-width: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.toolbar span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.toolbar button {
+  padding: 7px 9px;
+  font-size: 12px;
+}
+
+.mode {
+  color: var(--accent) !important;
+  font-weight: bold;
+}
+
+.factory-tabs {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.factory-tab {
+  background: #1d3045;
+}
+
+.factory-tab.active {
+  color: #102126;
+  background: var(--accent);
+  font-weight: bold;
+}
+
+.factory-wrap {
+  min-height: 650px;
+  max-height: calc(100vh - 145px);
+  overflow: auto;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    linear-gradient(45deg, rgba(255,255,255,.025) 25%, transparent 25%,
+    transparent 75%, rgba(255,255,255,.025) 75%),
+    linear-gradient(45deg, rgba(255,255,255,.025) 25%, transparent 25%,
+    transparent 75%, rgba(255,255,255,.025) 75%);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+  background-color: #101b29;
+}
+
+.factory {
+  display: grid;
+  grid-template-columns: repeat(16, 68px);
+  gap: 5px;
+  width: max-content;
+}
+
+.tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border: 1px solid #30445d;
+  border-radius: 8px;
+  background: rgba(28,45,64,.75);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tile:hover {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px rgba(79,209,197,.25);
+}
+
+.tile.empty::after {
+  content: "+";
+  color: #49617e;
+  font-size: 22px;
+}
+
+.tile.locked {
+  cursor: not-allowed;
+  opacity: .55;
+  background: #121b27;
+}
+
+.tile.locked::after {
+  content: "🔒";
+  font-size: 17px;
+}
+
+.building-icon {
+  font-size: 30px;
+  filter: drop-shadow(0 2px 3px #000);
+}
+
+.tile .level {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.tile .status {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  font-size: 10px;
+}
+
+.recipe {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 15px;
+}
+
+.recipe-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 7px;
+  background: var(--panel2);
+  font-size: 11px;
+}
+
+.skill,
+.mission {
+  margin-top: 8px;
+  padding: 9px;
+  border: 1px solid #38516d;
+  border-radius: 8px;
+  background: #1a2a3d;
+}
+
+.skill b,
+.mission b {
+  display: block;
+  color: var(--text);
+}
+
+.skill small,
+.mission small {
+  display: block;
+  margin: 3px 0;
+  color: var(--muted);
+}
+
+.skill button {
+  padding: 6px;
+  font-size: 11px;
+}
+
+.mission.done {
+  border-color: var(--green);
+}
+
+.log {
+  height: 170px;
+  overflow: auto;
+  padding: 9px;
+  border-radius: 8px;
+  background: #101a27;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.log div {
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.good {
+  color: var(--green);
+}
+
+.bad {
+  color: var(--red);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+@media (max-width: 1160px) {
+  .app {
+    grid-template-columns: 230px minmax(550px, 1fr);
+  }
+
+  .right-panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 780px) {
+  .app {
+    display: block;
+  }
+
+  .panel,
+  .game-area {
+    margin-bottom: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🏭 Factory Frontier</h1>
+  <p>工場を建設し、製品を作り、世界一の会社を目指そう</p>
+</header>
+
+<main class="app">
+
+  <aside class="panel">
+    <h2>会社情報</h2>
+
+    <div class="stats">
+      <div class="stat">
+        <small>資金</small>
+        <strong id="money">¥0</strong>
+      </div>
+
+      <div class="stat">
+        <small>スキルポイント</small>
+        <strong id="skillPoints">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>電力</small>
+        <strong id="energy">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>鉄鉱石</small>
+        <strong id="ore">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>鉄板</small>
+        <strong id="plate">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>プラスチック</small>
+        <strong id="plastic">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>電子機器</small>
+        <strong id="electronics">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>家具</small>
+        <strong id="furniture">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>バッテリー</small>
+        <strong id="battery">0</strong>
+      </div>
+    </div>
+
+    <h2>建設メニュー</h2>
+    <div class="build-list" id="buildList"></div>
+
+    <div class="help">
+      建物を選択してから、工場の空きマスをクリックしてください。<br>
+      建設費が足りない場合でも建物選択はできます。実際にマスをクリックした時に資金が確認されます。<br><br>
+      <b>Esc</b>キーで建設モードを解除できます。
+    </div>
+  </aside>
+
+  <section class="game-area">
+
+    <div class="toolbar">
+      <span id="statusText">準備完了</span>
+      <span id="buildModeText" class="mode"></span>
+
+      <button onclick="expandLand()">🌱 土地拡張</button>
+      <button onclick="unlockSecondFactory()">🏭 第2工場</button>
+      <button onclick="togglePause()" id="pauseButton">⏸ 一時停止</button>
+      <button onclick="saveGame()">💾 セーブ</button>
+      <button onclick="loadGame()">📂 ロード</button>
+      <button onclick="resetGame()">リセット</button>
+    </div>
+
+    <div class="factory-tabs" id="factoryTabs"></div>
+
+    <div class="factory-wrap">
+      <div class="factory" id="factory"></div>
+    </div>
+  </section>
+
+  <aside class="panel">
+
+    <h2>販売設定</h2>
+
+    <div class="card">
+      <h3>販売する製品</h3>
+
+      <select id="sellProduct" onchange="changeSellProduct(this.value)">
+        <option value="electronics">💻 電子機器</option>
+        <option value="furniture">🪑 家具</option>
+        <option value="battery">🔋 バッテリー</option>
+      </select>
+
+      <div id="sellInfo" style="margin-top:8px"></div>
+
+      <button onclick="sellProducts(1)">1個販売</button>
+      <button onclick="sellProducts(10)">10個販売</button>
+    </div>
+
+    <h2>スキル</h2>
+
+    <div class="card">
+      <div class="skill">
+        <b>🚚 自動納品</b>
+        <small>選択中の製品を毎秒1個、自動で販売します。</small>
+        <button id="autoDeliveryButton" onclick="buySkill('autoDelivery')">
+          5ポイントで解放
+        </button>
+      </div>
+
+      <div class="skill">
+        <b>⚙️ 生産効率化</b>
+        <small>全工場の生産量が25%増えます。</small>
+        <button id="efficiencyButton" onclick="buySkill('efficiency')">
+          8ポイントで解放
+        </button>
+      </div>
+
+      <div class="skill">
+        <b>💰 販売交渉術</b>
+        <small>販売価格が25%上がります。</small>
+        <button id="salesButton" onclick="buySkill('sales')">
+          10ポイントで解放
+        </button>
+      </div>
+    </div>
+
+    <h2>ミッション</h2>
+
+    <div class="card">
+      <div id="missions"></div>
+    </div>
+
+    <h2>選択中の建物</h2>
+    <div class="card" id="selected">
+      建物をクリックすると詳細が表示されます。
+    </div>
+
+    <h2>イベントログ</h2>
+    <div class="log" id="log"></div>
+  </aside>
+
+</main>
+
+<script>
+"use strict";
+
+const MAX_TILES = 192;
+const INITIAL_TILES = 48;
+
+const BUILDINGS = {
+  mine: {
+    name: "採掘場",
+    icon: "⛏️",
+    cost: 100,
+    desc: "鉄鉱石を生産します。",
+    work: "鉄鉱石 +1 / 秒"
+  },
+
+  power: {
+    name: "発電所",
+    icon: "⚡",
+    cost: 180,
+    desc: "工場に電力を供給します。",
+    work: "電力 +5 / 秒"
+  },
+
+  smelter: {
+    name: "精錬炉",
+    icon: "🔥",
+    cost: 260,
+    desc: "鉄鉱石を鉄板に加工します。",
+    work: "鉄鉱石2 → 鉄板1"
+  },
+
+  chemical: {
+    name: "化学工場",
+    icon: "🧪",
+    cost: 320,
+    desc: "電力からプラスチックを作ります。",
+    work: "電力2 → プラスチック1"
+  },
+
+  electronics: {
+    name: "電子工場",
+    icon: "💻",
+    cost: 470,
+    desc: "鉄板とプラスチックから電子機器を作ります。",
+    work: "鉄板1・樹脂1・電力2 → 電子機器1"
+  },
+
+  furniture: {
+    name: "家具工場",
+    icon: "🪑",
+    cost: 430,
+    desc: "鉄板とプラスチックから家具を作ります。",
+    work: "鉄板1・樹脂1・電力2 → 家具1"
+  },
+
+  battery: {
+    name: "電池工場",
+    icon: "🔋",
+    cost: 560,
+    desc: "鉄板とプラスチックからバッテリーを作ります。",
+    work: "鉄板1・樹脂1・電力2 → バッテリー1"
+  },
+
+  warehouse: {
+    name: "倉庫",
+    icon: "📦",
+    cost: 150,
+    desc: "商品の販売価格を上げます。",
+    work: "販売価格 +10%"
+  }
+};
+
+const PRODUCTS = {
+  electronics: {
+    name: "電子機器",
+    icon: "💻",
+    price: 100
+  },
+
+  furniture: {
+    name: "家具",
+    icon: "🪑",
+    price: 120
+  },
+
+  battery: {
+    name: "バッテリー",
+    icon: "🔋",
+    price: 150
+  }
+};
+
+function createFactory(name, unlocked) {
+  return {
+    name,
+    unlocked,
+    buildings: Array(MAX_TILES).fill(null)
+  };
+}
+
+function createNewState() {
+  return {
+    version: 2,
+
+    money: 1200,
+    skillPoints: 0,
+
+    energy: 0,
+    ore: 0,
+    plate: 0,
+    plastic: 0,
+
+    electronics: 0,
+    furniture: 0,
+    battery: 0,
+
+    selectedBuild: "mine",
+    selectedTile: null,
+    currentFactory: 0,
+    sellProduct: "electronics",
+
+    secondFactoryUnlocked: false,
+    paused: false,
+    sold: 0,
+    tick: 0,
+
+    skills: {
+      autoDelivery: false,
+      efficiency: false,
+      sales: false
+    },
+
+    missions: {
+      firstBuilding: false,
+      soldTen: false,
+      expanded: false,
+      secondFactory: false
+    },
+
+    factories: [
+      createFactory("第1工場", INITIAL_TILES),
+      createFactory("第2工場", 0)
+    ]
+  };
+}
+
+let state = createNewState();
+
+const $ = id => document.getElementById(id);
+
+function formatMoney(value) {
+  return "¥" + Math.floor(value).toLocaleString("ja-JP");
+}
+
+function addLog(message, type = "") {
+  const item = document.createElement("div");
+  item.className = type;
+  item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+
+  $("log").prepend(item);
+
+  while ($("log").children.length > 40) {
+    $("log").lastChild.remove();
+  }
+}
+
+function currentFactory() {
+  return state.factories[state.currentFactory];
+}
+
+function allBuildings(type = null) {
+  const result = [];
+
+  for (const factory of state.factories) {
+    if (!factory || !factory.buildings) continue;
+
+    for (const building of factory.buildings) {
+      if (building && (!type || building.type === type)) {
+        result.push(building);
+      }
+    }
+  }
+
+  return result;
+}
+
+function countBuildings(factoryIndex) {
+  const factory = state.factories[factoryIndex];
+  if (!factory || !factory.buildings) return 0;
+
+  return factory.buildings.filter(Boolean).length;
+}
+
+function getStock(productId) {
+  return state[productId] || 0;
+}
+
+function getSellingPrice() {
+  const warehouses = allBuildings("warehouse")
+    .reduce((total, building) => total + building.level, 0);
+
+  let multiplier = 1 + warehouses * .1;
+
+  if (state.skills.sales) {
+    multiplier += .25;
+  }
+
+  return Math.floor(PRODUCTS[state.sellProduct].price * multiplier);
+}
+
+function renderStats() {
+  $("money").textContent = formatMoney(state.money);
+  $("skillPoints").textContent = state.skillPoints;
+  $("energy").textContent = Math.floor(state.energy);
+  $("ore").textContent = Math.floor(state.ore);
+  $("plate").textContent = Math.floor(state.plate);
+  $("plastic").textContent = Math.floor(state.plastic);
+  $("electronics").textContent = Math.floor(state.electronics);
+  $("furniture").textContent = Math.floor(state.furniture);
+  $("battery").textContent = Math.floor(state.battery);
+
+  const product = PRODUCTS[state.sellProduct];
+
+  $("sellInfo").innerHTML = `
+    ${product.icon} ${product.name}：
+    <span class="accent">${getStock(state.sellProduct)}個</span><br>
+    販売価格：
+    <span class="accent">${formatMoney(getSellingPrice())}</span>
+  `;
+}
+
+function renderBuildMenu() {
+  $("buildList").innerHTML = "";
+
+  for (const [id, building] of Object.entries(BUILDINGS)) {
+    const button = document.createElement("button");
+
+    /*
+      重要：
+      ここでは disabled にしない。
+      以前のように資金不足でボタンを無効化すると、
+      建設モードに入れないように見えるため。
+    */
+    button.className =
+      "build-button" +
+      (state.selectedBuild === id ? " selected" : "");
+
+    button.innerHTML = `
+      <span class="icon">${building.icon}</span>
+      <span>
+        <b>${building.name}</b>
+        <small>${building.work}</small>
+      </span>
+      <span class="price">${formatMoney(building.cost)}</span>
+    `;
+
+    button.onclick = () => {
+      state.selectedBuild = id;
+      state.selectedTile = null;
+
+      $("buildModeText").textContent =
+        `建設モード：${building.icon} ${building.name}　空きマスをクリック`;
+
+      $("statusText").textContent =
+        "建設場所を選択してください";
+
+      addLog(
+        `${building.name}を選択しました。空きマスをクリックしてください。`
+      );
+
+      renderBuildMenu();
+    };
+
+    $("buildList").appendChild(button);
+  }
+}
+
+function renderFactoryTabs() {
+  $("factoryTabs").innerHTML = "";
+
+  state.factories.forEach((factory, index) => {
+    if (index === 1 && !state.secondFactoryUnlocked) return;
+
+    const button = document.createElement("button");
+
+    button.className =
+      "factory-tab" +
+      (state.currentFactory === index ? " active" : "");
+
+    button.textContent =
+      `${factory.name}　${countBuildings(index)}棟`;
+
+    button.onclick = () => {
+      state.currentFactory = index;
+      state.selectedTile = null;
+
+      $("selected").textContent =
+        "建物をクリックすると詳細が表示されます。";
+
+      render();
+    };
+
+    $("factoryTabs").appendChild(button);
+  });
+}
+
+function renderFactory() {
+  const factory = currentFactory();
+  $("factory").innerHTML = "";
+
+  if (!factory || !Array.isArray(factory.buildings)) {
+    factory = createFactory("第1工場", INITIAL_TILES);
+  }
+
+  factory.buildings.forEach((building, index) => {
+    const tile = document.createElement("div");
+    const locked = index >= factory.unlocked;
+
+    tile.className =
+      "tile " + (locked ? "locked" : building ? "occupied" : "empty");
+
+    if (building) {
+      const info = BUILDINGS[building.type];
+
+      tile.innerHTML = `
+        <span class="building-icon">${info.icon}</span>
+        <span class="level">Lv.${building.level}</span>
+        <span class="status">${building.active ? "🟢" : "⏸️"}</span>
+      `;
+
+      tile.title = `${info.name} Lv.${building.level}`;
+    }
+
+    if (!locked) {
+      tile.addEventListener("click", () => {
+        handleTileClick(index);
+      });
+    }
+
+    $("factory").appendChild(tile);
+  });
+}
+
+function handleTileClick(index) {
+  const factory = currentFactory();
+
+  if (!factory || index < 0 || index >= factory.buildings.length) {
+    addLog("この建設場所は使用できません。", "bad");
+    return;
+  }
+
+  if (index >= factory.unlocked) {
+    addLog("この土地はまだロックされています。", "bad");
+    return;
+  }
+
+  const existing = factory.buildings[index];
+
+  if (existing) {
+    state.selectedTile = index;
+    showBuildingDetails(index);
+    return;
+  }
+
+  const type = state.selectedBuild;
+  const info = BUILDINGS[type];
+
+  if (!info) {
+    addLog("建物データが見つかりません。", "bad");
+    return;
+  }
+
+  if (state.money < info.cost) {
+    addLog(
+      `${info.name}を建設するには${formatMoney(info.cost)}必要です。`,
+      "bad"
+    );
+    return;
+  }
+
+  state.money -= info.cost;
+
+  factory.buildings[index] = {
+    type,
+    level: 1,
+    active: true
+  };
+
+  state.selectedTile = index;
+  state.missions.firstBuilding = true;
+
+  addLog(
+    `${factory.name}に${info.icon}${info.name}を建設しました。`,
+    "good"
+  );
+
+  $("statusText").textContent =
+    `${info.name}を建設しました`;
+
+  render();
+  showBuildingDetails(index);
+}
+
+function showBuildingDetails(index) {
+  const factory = currentFactory();
+  const building = factory && factory.buildings[index];
+
+  if (!building) {
+    $("selected").textContent =
+      "建物をクリックすると詳細が表示されます。";
+    return;
+  }
+
+  const info = BUILDINGS[building.type];
+  const upgradeCost = Math.floor(info.cost * building.level * .75);
+  const refund = Math.floor(info.cost * .5);
+
+  $("selected").innerHTML = `
+    <h3>${info.icon} ${info.name} Lv.${building.level}</h3>
+    <div>${info.desc}</div>
+    <div class="accent">効果：${info.work}</div>
+    <div>状態：${building.active ? "稼働中" : "停止中"}</div>
+
+    <button onclick="toggleBuilding(${index})">
+      ${building.active ? "⏸ 停止" : "▶ 再稼働"}
+    </button>
+
+    <button onclick="upgradeBuilding(${index})">
+      ⬆ アップグレード（${formatMoney(upgradeCost)}）
+    </button>
+
+    <button onclick="demolishBuilding(${index})">
+      🗑 解体して${formatMoney(refund)}回収
+    </button>
+  `;
+}
+
+function toggleBuilding(index) {
+  const factory = currentFactory();
+  const building = factory.buildings[index];
+
+  if (!building) return;
+
+  building.active = !building.active;
+
+  addLog(
+    `${BUILDINGS[building.type].name}を` +
+    `${building.active ? "再稼働" : "停止"}しました。`
+  );
+
+  render();
+  showBuildingDetails(index);
+}
+
+function upgradeBuilding(index) {
+  const factory = currentFactory();
+  const building = factory.buildings[index];
+
+  if (!building) return;
+
+  const info = BUILDINGS[building.type];
+  const cost = Math.floor(info.cost * building.level * .75);
+
+  if (state.money < cost) {
+    addLog("アップグレード資金が足りません。", "bad");
+    return;
+  }
+
+  state.money -= cost;
+  building.level++;
+
+  addLog(
+    `${info.name}をLv.${building.level}にアップグレードしました。`,
+    "good"
+  );
+
+  render();
+  showBuildingDetails(index);
+}
+
+function demolishBuilding(index) {
+  const factory = currentFactory();
+  const building = factory.buildings[index];
+
+  if (!building) return;
+
+  const info = BUILDINGS[building.type];
+  const refund = Math.floor(info.cost * .5);
+
+  state.money += refund;
+  factory.buildings[index] = null;
+  state.selectedTile = null;
+
+  addLog(
+    `${info.name}を解体し、${formatMoney(refund)}を回収しました。`
+  );
+
+  render();
+
+  $("selected").textContent =
+    "建物をクリックすると詳細が表示されます。";
+}
+
+function changeSellProduct(productId) {
+  if (!PRODUCTS[productId]) return;
+
+  state.sellProduct = productId;
+  renderStats();
+
+  addLog(`${PRODUCTS[productId].name}を販売対象にしました。`);
+}
+
+function sellProducts(amount, silent = false) {
+  const product = PRODUCTS[state.sellProduct];
+  const stock = getStock(state.sellProduct);
+
+  if (stock < amount) {
+    if (!silent) {
+      addLog(`${product.name}が足りません。`, "bad");
+    }
+
+    return false;
+  }
+
+  const income = getSellingPrice() * amount;
+
+  state[state.sellProduct] -= amount;
+  state.money += income;
+  state.skillPoints += amount;
+  state.sold += amount;
+
+  if (!silent) {
+    addLog(
+      `${product.icon}${product.name}を${amount}個販売。` +
+      `${formatMoney(income)}とスキルポイント${amount}を獲得しました。`,
+      "good"
+    );
+  }
+
+  renderStats();
+  checkMissions();
+
+  return true;
+}
+
+function buySkill(skill) {
+  const costs = {
+    autoDelivery: 5,
+    efficiency: 8,
+    sales: 10
+  };
+
+  const names = {
+    autoDelivery: "自動納品",
+    efficiency: "生産効率化",
+    sales: "販売交渉術"
+  };
+
+  if (state.skills[skill]) return;
+
+  const cost = costs[skill];
+
+  if (state.skillPoints < cost) {
+    addLog("スキルポイントが足りません。", "bad");
+    return;
+  }
+
+  state.skillPoints -= cost;
+  state.skills[skill] = true;
+
+  addLog(`スキル「${names[skill]}」を解放しました。`, "good");
+  render();
+}
+
+function renderSkills() {
+  const data = [
+    ["autoDelivery", "autoDeliveryButton", "自動納品"],
+    ["efficiency", "efficiencyButton", "生産効率化"],
+    ["sales", "salesButton", "販売交渉術"]
+  ];
+
+  for (const [skill, id, name] of data) {
+    const button = $(id);
+
+    if (state.skills[skill]) {
+      button.disabled = true;
+      button.textContent = `✅ ${name} 解放済み`;
+    } else {
+      button.disabled = false;
+    }
+  }
+}
+
+function renderMissions() {
+  const missions = [
+    {
+      key: "firstBuilding",
+      title: "最初の一歩",
+      text: "建物を1つ建設する",
+      reward: 3,
+      done: state.missions.firstBuilding
+    },
+    {
+      key: "soldTen",
+      title: "初めての取引",
+      text: "製品を10個販売する",
+      reward: 5,
+      done: state.missions.soldTen
+    },
+    {
+      key: "expanded",
+      title: "事業拡大",
+      text: "土地を1回拡張する",
+      reward: 8,
+      done: state.missions.expanded
+    },
+    {
+      key: "secondFactory",
+      title: "第二拠点",
+      text: "第2工場を解放する",
+      reward: 15,
+      done: state.missions.secondFactory
+    }
+  ];
+
+  $("missions").innerHTML = missions.map(mission => `
+    <div class="mission ${mission.done ? "done" : ""}">
+      <b>${mission.done ? "✅" : "⬜"} ${mission.title}</b>
+      <small>${mission.text}</small>
+      <small>
+        報酬：スキルポイント${mission.reward}
+        ${mission.done ? "（達成済み）" : ""}
+      </small>
+    </div>
+  `).join("");
+}
+
+function completeMission(key, reward, message) {
+  if (state.missions[key]) return;
+
+  state.missions[key] = true;
+  state.skillPoints += reward;
+
+  addLog(
+    `ミッション達成：${message} スキルポイント+${reward}`,
+    "good"
+  );
+}
+
+function checkMissions() {
+  if (state.sold >= 10) {
+    completeMission("soldTen", 5, "初めての取引");
+  }
+
+  if (state.secondFactoryUnlocked) {
+    completeMission("secondFactory", 15, "第二拠点");
+  }
+
+  renderMissions();
+}
+
+function expandLand() {
+  const factory = currentFactory();
+
+  if (factory.unlocked >= MAX_TILES) {
+    addLog("この工場の土地は最大まで拡張されています。");
+    return;
+  }
+
+  const expansionCount =
+    Math.floor((factory.unlocked - INITIAL_TILES) / 16) + 1;
+
+  const cost = 500 + expansionCount * 350;
+
+  if (state.money < cost) {
+    addLog(
+      `土地拡張には${formatMoney(cost)}必要です。`,
+      "bad"
+    );
+    return;
+  }
+
+  state.money -= cost;
+  factory.unlocked = Math.min(MAX_TILES, factory.unlocked + 16);
+
+  completeMission("expanded", 8, "事業拡大");
+
+  addLog(
+    `${factory.name}を拡張しました。` +
+    "建設可能な土地が増えました。",
+    "good"
+  );
+
+  render();
+}
+
+function unlockSecondFactory() {
+  if (state.secondFactoryUnlocked) {
+    state.currentFactory = 1;
+    render();
+    return;
+  }
+
+  const cost = 5000;
+
+  if (state.money < cost) {
+    addLog(
+      `第2工場には${formatMoney(cost)}必要です。`,
+      "bad"
+    );
+    return;
+  }
+
+  state.money -= cost;
+  state.secondFactoryUnlocked = true;
+  state.factories[1].unlocked = INITIAL_TILES;
+  state.currentFactory = 1;
+
+  completeMission("secondFactory", 15, "第二拠点");
+
+  addLog("第2工場を解放しました。", "good");
+  render();
+}
+
+function produce() {
+  let efficiency = state.skills.efficiency ? 1.25 : 1;
+
+  for (const factory of state.factories) {
+    if (!factory || factory.unlocked === 0) continue;
+
+    for (const building of factory.buildings) {
+      if (!building || !building.active) continue;
+
+      const amount = Math.max(
+        1,
+        Math.floor(building.level * efficiency)
+      );
+
+      if (building.type === "power") {
+        state.energy += amount * 5;
+      }
+
+      if (building.type === "mine") {
+        state.ore += amount;
+      }
+
+      if (building.type === "smelter") {
+        const possible = Math.min(amount, Math.floor(state.ore / 2));
+
+        state.ore -= possible * 2;
+        state.plate += possible;
+      }
+
+      if (building.type === "chemical") {
+        const possible = Math.min(amount, Math.floor(state.energy / 2));
+
+        state.energy -= possible * 2;
+        state.plastic += possible;
+      }
+
+      if (
+        building.type === "electronics" ||
+        building.type === "furniture" ||
+        building.type === "battery"
+      ) {
+        const possible = Math.min(
+          amount,
+          state.plate,
+          state.plastic,
+          Math.floor(state.energy / 2)
+        );
+
+        if (possible > 0) {
+          state.plate -= possible;
+          state.plastic -= possible;
+          state.energy -= possible * 2;
+          state[building.type] += possible;
+        }
+      }
+    }
+  }
+
+  state.energy = Math.min(state.energy, 999999);
+
+  if (state.skills.autoDelivery) {
+    sellProducts(1, true);
+  }
+}
+
+function randomEvent() {
+  const events = [
+    {
+      chance: .35,
+      message: "📈 市場が好況です。資金を獲得しました。",
+      run: () => {
+        state.money += 300;
+      }
+    },
+    {
+      chance: .25,
+      message: "🔧 メンテナンス費用が発生しました。",
+      run: () => {
+        state.money = Math.max(0, state.money - 180);
+      }
+    },
+    {
+      chance: .2,
+      message: "🎁 取引先から鉄板が届きました。",
+      run: () => {
+        state.plate += 5;
+      }
+    },
+    {
+      chance: .2,
+      message: "⚡ 発電ボーナスが発生しました。",
+      run: () => {
+        state.energy += 20;
+      }
+    }
+  ];
+
+  const random = Math.random();
+  let total = 0;
+
+  for (const event of events) {
+    total += event.chance;
+
+    if (random <= total) {
+      event.run();
+      addLog(event.message, "good");
+      return;
+    }
+  }
+}
+
+function togglePause() {
+  state.paused = !state.paused;
+
+  $("pauseButton").textContent =
+    state.paused ? "▶ 再開" : "⏸ 一時停止";
+
+  $("statusText").textContent =
+    state.paused ? "ゲーム停止中" : "ゲーム稼働中";
+
+  addLog(state.paused ? "ゲームを一時停止しました。" : "ゲームを再開しました。");
+}
+
+function saveGame(silent = false) {
+  try {
+    localStorage.setItem(
+      "factoryFrontierSaveV2",
+      JSON.stringify(state)
+    );
+
+    if (!silent) {
+      addLog("ゲームをセーブしました。", "good");
+    }
+  } catch {
+    addLog("セーブに失敗しました。", "bad");
+  }
+}
+
+function normalizeState(saved) {
+  const fresh = createNewState();
+
+  if (!saved || typeof saved !== "object") {
+    return fresh;
+  }
+
+  const merged = {
+    ...fresh,
+    ...saved,
+    skills: {
+      ...fresh.skills,
+      ...(saved.skills || {})
+    },
+    missions: {
+      ...fresh.missions,
+      ...(saved.missions || {})
+    }
+  };
+
+  merged.factories = fresh.factories.map((factory, index) => {
+    const oldFactory =
+      saved.factories && saved.factories[index];
+
+    if (!oldFactory) {
+      return factory;
+    }
+
+    const buildings = Array(MAX_TILES).fill(null);
+
+    if (Array.isArray(oldFactory.buildings)) {
+      oldFactory.buildings
+        .slice(0, MAX_TILES)
+        .forEach((building, tileIndex) => {
+          if (building && BUILDINGS[building.type]) {
+            buildings[tileIndex] = {
+              type: building.type,
+              level: Number(building.level) || 1,
+              active: building.active !== false
+            };
+          }
+        });
+    }
+
+    return {
+      name: factory.name,
+      unlocked: Math.min(
+        MAX_TILES,
+        Math.max(0, Number(oldFactory.unlocked) || 0)
+      ),
+      buildings
+    };
+  });
+
+  if (!merged.secondFactoryUnlocked) {
+    merged.factories[1].unlocked = 0;
+  } else if (merged.factories[1].unlocked === 0) {
+    merged.factories[1].unlocked = INITIAL_TILES;
+  }
+
+  if (!PRODUCTS[merged.sellProduct]) {
+    merged.sellProduct = "electronics";
+  }
+
+  merged.currentFactory =
+    merged.currentFactory === 1 &&
+    merged.secondFactoryUnlocked ? 1 : 0;
+
+  return merged;
+}
+
+function loadGame() {
+  try {
+    const saved = localStorage.getItem("factoryFrontierSaveV2");
+
+    if (!saved) {
+      addLog("セーブデータがありません。", "bad");
+      return;
+    }
+
+    state = normalizeState(JSON.parse(saved));
+
+    addLog(
+      "セーブデータを読み込みました。建物データを確認しました。",
+      "good"
+    );
+
+    render();
+  } catch {
+    addLog(
+      "古いセーブデータが壊れていたため、新しいデータで開始しました。",
+      "bad"
+    );
+
+    state = createNewState();
+    render();
+  }
+}
+
+function resetGame() {
+  if (!confirm("本当に最初からやり直しますか？")) {
+    return;
+  }
+
+  localStorage.removeItem("factoryFrontierSaveV2");
+  state = createNewState();
+
+  addLog("新しいゲームを開始しました。");
+  render();
+}
+
+function render() {
+  renderStats();
+  renderBuildMenu();
+  renderFactoryTabs();
+  renderFactory();
+  renderSkills();
+  renderMissions();
+
+  $("sellProduct").value = state.sellProduct;
+
+  if (state.selectedTile !== null) {
+    const factory = currentFactory();
+
+    if (
+      factory &&
+      factory.buildings[state.selectedTile]
+    ) {
+      showBuildingDetails(state.selectedTile);
+    }
+  }
+}
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    state.selectedTile = null;
+    $("buildModeText").textContent = "";
+    $("statusText").textContent = "建設モードを解除しました";
+    renderBuildMenu();
+  }
+});
+
+function gameLoop() {
+  if (state.paused) return;
+
+  produce();
+
+  state.tick++;
+
+  if (state.tick % 30 === 0) {
+    randomEvent();
+  }
+
+  if (state.tick % 5 === 0) {
+    renderStats();
+    renderFactoryTabs();
+    renderFactory();
+    renderMissions();
+  }
+
+  if (state.tick % 15 === 0) {
+    saveGame(true);
+  }
+}
+
+addLog("ゲームを開始しました。採掘場を建設してください。");
+addLog("建設メニューから建物を選び、工場の空きマスをクリックします。");
+
+render();
+setInterval(gameLoop, 1000);
+</script>
+
+</body>
+</html>
