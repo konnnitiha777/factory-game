@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0d14">
+<title>TIMECRAFT 3D — オリジナル時計メーカー</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI","Yu Gothic UI",sans-serif;background:#0a0d14;color:#f1f5fb}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#252548,#0a0d14 65%)}
+main{width:min(600px,100%);padding:28px;border:1px solid #30384d;border-radius:22px;background:#111722;box-shadow:0 25px 80px #0006}
+.mark{font-size:36px}h1{font-size:clamp(24px,5vw,36px);margin:8px 0}p{color:#aab8cd;line-height:1.8}#status{padding:14px;border-radius:12px;background:#1c2535;margin-top:18px;line-height:1.7;font-size:14px}.spin{display:inline-block;animation:spin 1.2s linear infinite;color:#b6a4ff}@keyframes spin{to{transform:rotate(360deg)}}small{color:#7f8ca4}
+</style>
+</head>
+<body>
+<main>
+<div class="mark">⌚</div>
+<h1>TIMECRAFT <span style="color:#a78bfa">3D</span></h1>
+<p>オリジナルの時計を、形・色・素材・文字盤の細部まで自由にデザインしよう。</p>
+<div id="status"><span class="spin">◌</span> 時計メーカーを読み込んでいるよ…</div>
+<p><small>3D描画ライブラリの読み込みにはインターネット接続が必要だよ。</small></p>
+</main>
+<script>
+(async()=>{
+ const status=document.getElementById('status');
+ try{
+  const parts=await Promise.all(Array.from({length:6},async(_,i)=>{
+   const response=await fetch('./payload/part'+i+'.txt',{cache:'no-store'});
+   if(!response.ok) throw new Error('データ '+i+' を読み込めませんでした (HTTP '+response.status+')');
+   return (await response.text()).trim();
+  }));
+  const binary=atob(parts.join(''));
+  const bytes=Uint8Array.from(binary,ch=>ch.charCodeAt(0));
+  if(!('DecompressionStream' in window)) throw new Error('このブラウザは圧縮データの展開に対応していません。ChromeまたはEdgeの最新版で開いてね。');
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const html=await new Response(stream).text();
+  if(!html.includes('TIMECRAFT')||!html.includes('init3D')) throw new Error('ページデータを正しく読み取れませんでした。');
+  document.open();document.write(html);document.close();
+ }catch(error){
+  console.error(error);
+  status.textContent='読み込みに失敗したよ。ページを再読み込みしてみてね。原因: '+error.message;
+ }
+})();
+</script>
+</body>
+</html>
